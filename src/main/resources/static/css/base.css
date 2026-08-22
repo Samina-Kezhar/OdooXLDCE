@@ -59,6 +59,13 @@ img {
   -webkit-text-fill-color: transparent;
 }
 
+/* Framework Support Utilities */
+.hidden { display: none !important; }
+.w-full { width: 100% !important; }
+.flex { display: flex; }
+.items-center { display: flex; align-items: center; }
+.justify-center { display: flex; justify-content: center; }
+
 #offline-indicator {
   display: none; /* hidden by default */
   background: var(--warning);
