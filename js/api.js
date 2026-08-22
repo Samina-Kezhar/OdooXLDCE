@@ -10,7 +10,7 @@ class ApiClient {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     };
-    this.isBackendAvailable = null;
+    this.isBackendAvailable = null; // null = untested, true, false
   }
 
   async _fetch(endpoint, options = {}) {
@@ -44,6 +44,7 @@ class ApiClient {
 
       return { status: response.status, data };
     } catch (error) {
+      // If error is network failure (server not reachable)
       if (error.name === 'TypeError' || error.message?.includes('fetch') || !navigator.onLine) {
         this.isBackendAvailable = false;
         throw { status: 0, isNetworkError: true, message: 'Backend service offline or unreachable. Using local storage.' };
@@ -73,6 +74,7 @@ class ApiClient {
       return { status: 200, data: user };
     } catch (err) {
       if (err.isNetworkError) {
+        // Fallback to local login
         const user = {
           id: 'usr-' + Date.now(),
           name: email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -91,6 +93,7 @@ class ApiClient {
   }
 
   async signup(name, email, password) {
+    // 409 Conflict Simulation check
     if (email.toLowerCase().includes('taken') || email.toLowerCase() === 'existing@example.com') {
       throw { status: 409, message: `The email address '${email}' is already registered. Please login instead.` };
     }
@@ -128,7 +131,9 @@ class ApiClient {
         AppStore.trips = frontendTrips;
         return { status: 200, data: frontendTrips };
       }
-    } catch (err) {}
+    } catch (err) {
+      // Fallback to local store
+    }
     return { status: 200, data: [...AppStore.trips] };
   }
 
@@ -138,7 +143,9 @@ class ApiClient {
       if (res.data) {
         return { status: 200, data: await this._transformBackendTrip(res.data) };
       }
-    } catch (err) {}
+    } catch (err) {
+      // Fallback
+    }
     const trip = AppStore.trips.find(t => t.id === tripId);
     if (!trip) throw { status: 404, message: `Trip '${tripId}' not found.` };
     return { status: 200, data: JSON.parse(JSON.stringify(trip)) };
@@ -187,7 +194,9 @@ class ApiClient {
         })
       });
       if (res.data?.id) newTrip.id = res.data.id;
-    } catch (err) {}
+    } catch (err) {
+      // Fallback to local persistence
+    }
 
     const updated = [newTrip, ...AppStore.trips];
     AppStore.saveTrips(updated);

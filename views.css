@@ -1,0 +1,625 @@
+/* ==========================================================================
+   GlobeTrotter Views Styles
+   Screen-specific CSS for all 13 distinct views
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Auth Screen Styles
+   -------------------------------------------------------------------------- */
+.auth-wrapper {
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface-1);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.15);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.auth-logo-badge {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 1rem;
+  background: var(--grad-primary);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.4);
+}
+
+.auth-tabs {
+  margin-bottom: 1.5rem;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.demo-login-box {
+  margin-top: 1.25rem;
+  padding: 0.85rem;
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px dashed rgba(99, 102, 241, 0.3);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   2. Dashboard Screen Styles
+   -------------------------------------------------------------------------- */
+.dashboard-hero {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.15) 50%, rgba(17, 24, 39, 0.8) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.25rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-hero::after {
+  content: '✈️';
+  position: absolute;
+  right: 2rem;
+  bottom: -1rem;
+  font-size: 8rem;
+  opacity: 0.08;
+  pointer-events: none;
+  transform: rotate(-15deg);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.stat-icon-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Recommended Destinations Grid */
+.destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.destination-card {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  height: 280px;
+  cursor: pointer;
+}
+
+.destination-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.destination-card:hover .destination-card-img {
+  transform: scale(1.08);
+}
+
+.destination-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11, 15, 25, 0.95) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   3. Create Trip Screen / Modal
+   -------------------------------------------------------------------------- */
+.cover-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.cover-preset-thumb {
+  height: 70px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  border: 2px solid transparent;
+  object-fit: cover;
+  width: 100%;
+  transition: all var(--transition-fast);
+}
+
+.cover-preset-thumb:hover {
+  transform: scale(1.05);
+}
+
+.cover-preset-thumb.selected {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+}
+
+.file-dropzone {
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface-2);
+  transition: all var(--transition-fast);
+}
+
+.file-dropzone:hover {
+  border-color: var(--primary-400);
+  background: var(--surface-1);
+}
+
+/* --------------------------------------------------------------------------
+   4. My Trips (Trip List)
+   -------------------------------------------------------------------------- */
+.trips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.trip-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.trip-card-header {
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.trip-card-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.trip-card:hover .trip-card-cover {
+  transform: scale(1.06);
+}
+
+.trip-status-tag {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+.trip-card-body {
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.trip-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.trip-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  margin-bottom: 0.85rem;
+}
+
+.trip-budget-progress {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.progress-bar-wrap {
+  height: 6px;
+  width: 100%;
+  background: var(--surface-3);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.35rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.trip-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Pagination Controls */
+.pagination-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+/* --------------------------------------------------------------------------
+   5 & 6. Itinerary Builder & View
+   -------------------------------------------------------------------------- */
+.itinerary-container {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.75rem;
+}
+
+@media (max-width: 1024px) {
+  .itinerary-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.itinerary-days-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.day-card {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.day-card.has-conflict {
+  border-color: rgba(245, 158, 11, 0.6);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+}
+
+.day-card-header {
+  padding: 1rem 1.25rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.day-number-badge {
+  background: var(--grad-primary);
+  color: #fff;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-xs);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.day-activities-list {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.activity-item.is-dragging {
+  opacity: 0.5;
+  border: 2px dashed var(--primary-400);
+}
+
+.activity-item.conflict-overlap {
+  border-left: 4px solid var(--accent-amber);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.activity-drag-handle {
+  color: var(--text-subtle);
+  cursor: grab;
+  font-size: 1.1rem;
+  user-select: none;
+}
+
+.activity-time-tag {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.1);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+}
+
+.activity-cost-tag {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent-emerald);
+}
+
+/* --------------------------------------------------------------------------
+   7 & 8. Search View (City & Activity)
+   -------------------------------------------------------------------------- */
+.search-hero {
+  background: var(--surface-1);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.search-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.filter-pill {
+  padding: 0.4rem 0.9rem;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-pill:hover {
+  background: var(--surface-3);
+  color: var(--text-main);
+}
+
+.filter-pill.active {
+  background: var(--primary-500);
+  border-color: var(--primary-400);
+  color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   9. Trip Budget Screen & Charts
+   -------------------------------------------------------------------------- */
+.budget-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  position: relative;
+}
+
+.chart-canvas-container {
+  width: 100%;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   10. Calendar & Timeline
+   -------------------------------------------------------------------------- */
+.calendar-grid-wrap {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.calendar-day-cell {
+  min-height: 110px;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-fast);
+}
+
+.calendar-day-cell.in-trip {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.calendar-day-cell.today {
+  box-shadow: inset 0 0 0 2px var(--accent-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   11. Public Shared View
+   -------------------------------------------------------------------------- */
+.shared-trip-hero {
+  height: 320px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.shared-trip-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shared-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(11, 15, 25, 0.95) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2.5rem;
+}
+
+.social-share-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   12. Profile & Settings
+   -------------------------------------------------------------------------- */
+.profile-avatar-selector {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.avatar-preview-lg {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary-400);
+  box-shadow: var(--shadow-glow);
+}
+
+.avatar-options-grid {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.avatar-option-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.avatar-option-thumb:hover {
+  transform: scale(1.1);
+}
+
+.avatar-option-thumb.selected {
+  border-color: var(--primary-400);
+}
