@@ -1,12 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlobeTrotter</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="GlobeTrotter - Intelligent, personalized multi-city travel planning platform with dynamic itineraries, cost breakdowns, and collaborative sharing." />
+  <meta name="keywords" content="travel planner, itinerary builder, multi-city trip, travel budget, travel hackathon, globetrotter" />
+  <title>GlobeTrotter | Empowering Personalized Travel Planning</title>
+
+  <!-- Google Fonts: Outfit (Headings) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/views.css" />
 </head>
 <body>
-    <h1>Welcome to GlobeTrotter!</h1>
-    <p>Frontend development starts here.</p>
+
+  <!-- Offline Status Banner -->
+  <div id="offline-indicator">
+    <span>⚠️</span>
+    <span>You are currently in Offline Mode. Actions are saved locally to your device storage.</span>
+  </div>
+
+  <div id="app-container">
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">✈️</div>
+        <div class="brand-name">Globe<span class="text-gradient">Trotter</span></div>
+        <span class="brand-badge">v2.0</span>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Main Navigation">
+        <div class="nav-section-title">Planning & Travel</div>
+
+        <div class="nav-item active" data-route="dashboard" onclick="AppRouter.navigate('dashboard'); AppRouter.closeMobileSidebar();" id="nav-link-dashboard">
+          <span class="nav-item-icon">🏠</span>
+          <span>Dashboard</span>
+        </div>
+
+        <div class="nav-item" data-route="my-trips" onclick="AppRouter.navigate('my-trips'); AppRouter.closeMobileSidebar();" id="nav-link-my-trips">
+          <span class="nav-item-icon">🗺️</span>
+          <span>My Trips</span>
+          <span class="nav-item-badge" id="my-trips-count-badge">2</span>
+        </div>
+
+        <div class="nav-item" data-route="itinerary-builder" onclick="AppRouter.navigate('itinerary-builder'); AppRouter.closeMobileSidebar();" id="nav-link-builder">
+          <span class="nav-item-icon">📝</span>
+          <span>Itinerary Builder</span>
+        </div>
+
+        <div class="nav-item" data-route="search" onclick="AppRouter.navigate('search'); AppRouter.closeMobileSidebar();" id="nav-link-search">
+          <span class="nav-item-icon">🔍</span>
+          <span>City & Activities</span>
+        </div>
+
+        <div class="nav-section-title">Insights & Schedule</div>
+
+        <div class="nav-item" data-route="budget" onclick="AppRouter.navigate('budget'); AppRouter.closeMobileSidebar();" id="nav-link-budget">
+          <span class="nav-item-icon">📊</span>
+          <span>Trip Budget</span>
+        </div>
+
+        <div class="nav-item" data-route="calendar" onclick="AppRouter.navigate('calendar'); AppRouter.closeMobileSidebar();" id="nav-link-calendar">
+          <span class="nav-item-icon">📅</span>
+          <span>Calendar & Timeline</span>
+        </div>
+
+        <div class="nav-item" data-route="shared-trip" onclick="AppRouter.navigate('shared-trip'); AppRouter.closeMobileSidebar();" id="nav-link-shared">
+          <span class="nav-item-icon">🔗</span>
+          <span>Public Share View</span>
+        </div>
+
+        <div class="nav-section-title">User & System</div>
+
+        <div class="nav-item" data-route="profile" onclick="AppRouter.navigate('profile'); AppRouter.closeMobileSidebar();" id="nav-link-profile">
+          <span class="nav-item-icon">⚙️</span>
+          <span>Profile & Settings</span>
+        </div>
+
+        <div class="nav-item" data-route="admin" onclick="AppRouter.navigate('admin'); AppRouter.closeMobileSidebar();" id="nav-link-admin">
+          <span class="nav-item-icon">📈</span>
+          <span>Admin Analytics</span>
+        </div>
+      </nav>
+
+      <!-- Sidebar User Profile Footer -->
+      <div class="sidebar-footer">
+        <div class="user-profile-summary" onclick="AppRouter.navigate('profile'); AppRouter.closeMobileSidebar();">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Alex River" class="user-avatar-img" id="user-sidebar-avatar" />
+          <div>
+            <div class="user-meta-name" id="user-sidebar-name">Alex River</div>
+            <div class="user-meta-email" id="user-sidebar-email">alex.river@globetrotter.io</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div id="main-wrapper">
+      <!-- Top Navbar -->
+      <header id="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-icon btn-secondary sidebar-toggle-btn" onclick="AppRouter.toggleMobileSidebar()" aria-label="Toggle navigation drawer">
+            ☰
+          </button>
+          <div class="page-breadcrumb">
+            <span>GlobeTrotter</span>
+            <span>/</span>
+            <span class="current" id="page-breadcrumb-current">Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Quick Search Bar -->
+          <div class="search-quick-bar">
+            <span class="search-icon-inside">🔍</span>
+            <input type="text" placeholder="Quick search destinations..." onkeydown="AppRouter.handleQuickSearch(event)" />
+          </div>
+
+          <!-- Plan New Trip Button CTA -->
+          <button class="btn btn-primary" onclick="AppRouter.navigate('create-trip')" id="btn-topbar-plan-trip">
+            <span>✨</span>
+            <span class="text">Plan New Trip</span>
+          </button>
+
+          <!-- Theme Toggle Quick Switch -->
+          <button class="btn btn-icon btn-secondary" onclick="ProfileView.updateTheme(AppStore.settings.theme === 'dark' ? 'light' : 'dark')" title="Toggle Dark/Light Mode">
+            🌓
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Dynamic View Container -->
+      <main id="view-container" role="main">
+        <!-- Rendered dynamically by SPA router -->
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav id="mobile-nav" aria-label="Mobile Navigation">
+      <div class="mobile-nav-item active" data-route="dashboard" onclick="AppRouter.navigate('dashboard')">
+        <span class="icon">🏠</span>
+        <span>Home</span>
+      </div>
+      <div class="mobile-nav-item" data-route="my-trips" onclick="AppRouter.navigate('my-trips')">
+        <span class="icon">🗺️</span>
+        <span>Trips</span>
+      </div>
+      <div class="mobile-nav-item" data-route="search" onclick="AppRouter.navigate('search')">
+        <span class="icon">🔍</span>
+        <span>Search</span>
+      </div>
+      <div class="mobile-nav-item" data-route="itinerary-builder" onclick="AppRouter.navigate('itinerary-builder')">
+        <span class="icon">📝</span>
+        <span>Builder</span>
+      </div>
+      <div class="mobile-nav-item" data-route="profile" onclick="AppRouter.navigate('profile')">
+        <span class="icon">👤</span>
+        <span>Profile</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Reusable Global Modal Dialog -->
+  <div class="modal-backdrop" id="modal-container" role="dialog" aria-modal="true">
+    <div class="modal-box" id="modal-box-content">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+  <!-- Global Toast Notification Container -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Application Scripts in Logical Dependency Order -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/api.js"></script>
+
+  <!-- Views -->
+  <script src="js/views/authView.js"></script>
+  <script src="js/views/dashboardView.js"></script>
+  <script src="js/views/createTripView.js"></script>
+  <script src="js/views/tripListView.js"></script>
+  <script src="js/views/itineraryBuilderView.js"></script>
+  <script src="js/views/itineraryView.js"></script>
+  <script src="js/views/searchView.js"></script>
+  <script src="js/views/budgetView.js"></script>
+  <script src="js/views/calendarView.js"></script>
+  <script src="js/views/sharedTripView.js"></script>
+  <script src="js/views/profileView.js"></script>
+  <script src="js/views/adminView.js"></script>
+
+  <!-- App Bootloader -->
+  <script src="js/app.js"></script>
 </body>
 </html>
