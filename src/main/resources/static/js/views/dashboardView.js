@@ -1,7 +1,6 @@
 /**
- * Screen 2: Dashboard / Home View
- * Central hub displaying welcome greeting, upcoming trip countdown, stats, recommended destinations,
- * skeleton loaders, retry handlers, and empty states.
+ * Screen 2: Dashboard / Home View with VisitTheUSA Cinematic Hero Carousel & 3D Motion
+ * Dynamic rotating headlines, timer progress indicators, stats, 3D card tilt, and empty states.
  */
 
 const DashboardView = {
@@ -11,7 +10,6 @@ const DashboardView = {
     const container = document.getElementById('view-container');
     if (!container) return;
 
-    // Show initial skeleton loader for smooth UX
     this.renderSkeleton(container);
 
     try {
@@ -23,14 +21,14 @@ const DashboardView = {
       const trips = tripsResponse.data;
       const user = AppStore.user;
 
-      // Greeting based on time of day
+      // Greeting
       const hour = new Date().getHours();
       let greeting = 'Good morning';
       let greetingIcon = '☀️';
       if (hour >= 12 && hour < 17) { greeting = 'Good afternoon'; greetingIcon = '🌤️'; }
       else if (hour >= 17) { greeting = 'Good evening'; greetingIcon = '🌙'; }
 
-      // Compute stats
+      // Stats
       const totalTrips = trips.length;
       let totalDays = 0;
       let totalBudget = 0;
@@ -39,39 +37,18 @@ const DashboardView = {
       trips.forEach(t => {
         totalDays += Utils.daysBetween(t.startDate, t.endDate);
         totalBudget += Number(t.budget) || 0;
-        t.days.forEach(d => { totalActivities += d.activities.length; });
+        t.days?.forEach(d => { totalActivities += d.activities?.length || 0; });
       });
-
-      // Find primary upcoming trip
-      const upcomingTrips = trips.filter(t => Utils.getTripStatus(t).raw !== 'past');
-      const featuredTrip = upcomingTrips[0] || trips[0];
 
       let contentHtml = `
         <div class="animate-fade-in">
-          <!-- Hero Banner -->
-          <div class="dashboard-hero">
-            <div style="position: relative; z-index: 2; max-width: 680px;">
-              <div class="badge badge-cyan" style="margin-bottom: 0.75rem;">${greetingIcon} Traveler Hub</div>
-              <h1 style="margin-bottom: 0.5rem;">${greeting}, <span class="text-gradient">${Utils.escapeHtml(user.name)}</span>!</h1>
-              <p style="font-size: 1.05rem; margin-bottom: 1.5rem; color: var(--text-main);">
-                ${totalTrips > 0 
-                  ? `You have <strong>${totalTrips} planned adventure${totalTrips > 1 ? 's' : ''}</strong> spanning <strong>${totalDays} days</strong> across the globe. Where to next?`
-                  : 'Start your journey by creating your first personalized multi-city itinerary.'}
-              </p>
-              <div class="flex items-center gap-3" style="flex-wrap: wrap;">
-                <button class="btn btn-primary btn-lg" onclick="AppRouter.navigate('create-trip')">
-                  <span>✨</span> Plan New Trip
-                </button>
-                <button class="btn btn-secondary btn-lg" onclick="AppRouter.navigate('search')">
-                  <span>🔍</span> Explore Destinations
-                </button>
-              </div>
-            </div>
-          </div>
+          <!-- VisitTheUSA Style Cinematic Hero Story Container -->
+          <div id="story-hero-container"></div>
 
-          <!-- Quick Stats Bar -->
-          <div class="stats-grid">
-            <div class="glass-card stat-card">
+          <!-- Quick Stats Bar (With Scroll Reveal) -->
+          <div class="stats-grid scroll-reveal delay-1">
+            <div class="glass-card stat-card tilt-card">
+              <div class="tilt-glare"></div>
               <div class="stat-icon-wrapper" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">🗺️</div>
               <div>
                 <div class="stat-value">${totalTrips}</div>
@@ -79,7 +56,8 @@ const DashboardView = {
               </div>
             </div>
 
-            <div class="glass-card stat-card">
+            <div class="glass-card stat-card tilt-card">
+              <div class="tilt-glare"></div>
               <div class="stat-icon-wrapper" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee;">📅</div>
               <div>
                 <div class="stat-value">${totalDays}</div>
@@ -87,7 +65,8 @@ const DashboardView = {
               </div>
             </div>
 
-            <div class="glass-card stat-card">
+            <div class="glass-card stat-card tilt-card">
+              <div class="tilt-glare"></div>
               <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">🎯</div>
               <div>
                 <div class="stat-value">${totalActivities}</div>
@@ -95,7 +74,8 @@ const DashboardView = {
               </div>
             </div>
 
-            <div class="glass-card stat-card">
+            <div class="glass-card stat-card tilt-card">
+              <div class="tilt-glare"></div>
               <div class="stat-icon-wrapper" style="background: rgba(249, 115, 22, 0.15); color: #fb923c;">💰</div>
               <div>
                 <div class="stat-value">${Utils.formatCurrency(totalBudget, user.homeCurrency || 'USD')}</div>
@@ -105,29 +85,29 @@ const DashboardView = {
           </div>
       `;
 
-      // Check if user has NO trips (Empty State edge case)
+      // Check if user has NO trips (Empty State)
       if (trips.length === 0) {
         contentHtml += `
-          <div class="empty-state" style="margin-top: 2rem; margin-bottom: 3rem;">
+          <div class="empty-state scroll-reveal delay-2" style="margin-top: 2rem; margin-bottom: 3rem;">
             <div class="empty-state-icon animate-float">🧳</div>
             <h3 class="empty-state-title">No trips planned yet</h3>
             <p class="empty-state-desc">
               Your passport is waiting! Start planning your next dream vacation with day-by-day itineraries, budgets, and activities.
             </p>
             <div class="flex items-center gap-3" style="flex-wrap: wrap; justify-content: center;">
-              <button class="btn btn-primary" onclick="AppRouter.navigate('create-trip')">
+              <button class="btn btn-primary ripple-effect" onclick="AppRouter.navigate('create-trip')">
                 <span>➕</span> Create Your First Trip
               </button>
-              <button class="btn btn-secondary" onclick="DashboardView.loadSampleTrip()">
+              <button class="btn btn-secondary ripple-effect" onclick="DashboardView.loadSampleTrip()">
                 <span>⚡</span> Load Sample Itinerary
               </button>
             </div>
           </div>
         `;
       } else {
-        // Featured / Recent Trips Section
+        // Active Trips Section
         contentHtml += `
-          <div class="section-header">
+          <div class="section-header scroll-reveal delay-2">
             <div class="section-title">
               <span>✈️</span> Your Active Itineraries
             </div>
@@ -136,15 +116,16 @@ const DashboardView = {
             </a>
           </div>
 
-          <div class="trips-grid">
+          <div class="trips-grid scroll-reveal delay-2">
             ${trips.slice(0, 3).map(trip => {
               const status = Utils.getTripStatus(trip);
-              const totalSpent = trip.days.reduce((sum, d) => sum + d.activities.reduce((s, a) => s + (Number(a.cost) || 0), 0), 0);
+              const totalSpent = trip.days?.reduce((sum, d) => sum + (d.activities?.reduce((s, a) => s + (Number(a.cost) || 0), 0) || 0), 0) || 0;
               const progressPct = Utils.safePercentage(totalSpent, trip.budget);
               const duration = Utils.daysBetween(trip.startDate, trip.endDate);
 
               return `
-                <div class="glass-card trip-card glass-card-interactive" onclick="DashboardView.openTrip('${trip.id}')">
+                <div class="glass-card trip-card glass-card-interactive tilt-card" onclick="DashboardView.openTrip('${trip.id}')">
+                  <div class="tilt-glare"></div>
                   <div class="trip-card-header">
                     <img src="${trip.coverImage || CONFIG.COVER_PRESETS[0].url}" alt="${Utils.escapeHtml(trip.title)}" class="trip-card-cover" />
                     <span class="badge badge-${status.type} trip-status-tag">${status.label}</span>
@@ -172,13 +153,13 @@ const DashboardView = {
                     </div>
                   </div>
                   <div class="trip-card-actions" onclick="event.stopPropagation();">
-                    <button class="btn btn-secondary btn-sm" onclick="DashboardView.openTrip('${trip.id}')">
+                    <button class="btn btn-secondary btn-sm ripple-effect" onclick="DashboardView.openTrip('${trip.id}')">
                       <span>📝</span> Builder
                     </button>
-                    <button class="btn btn-secondary btn-sm" onclick="AppRouter.navigate('budget', '${trip.id}')">
+                    <button class="btn btn-secondary btn-sm ripple-effect" onclick="AppRouter.navigate('budget', '${trip.id}')">
                       <span>📊</span> Budget
                     </button>
-                    <button class="btn btn-primary btn-sm" onclick="AppRouter.navigate('itinerary-view', '${trip.id}')">
+                    <button class="btn btn-primary btn-sm ripple-effect" onclick="AppRouter.navigate('itinerary-view', '${trip.id}')">
                       <span>👁️</span> View
                     </button>
                   </div>
@@ -191,16 +172,17 @@ const DashboardView = {
 
       // Recommended Destinations Section
       contentHtml += `
-        <div class="section-header" style="margin-top: 2.5rem;">
+        <div class="section-header scroll-reveal delay-3" style="margin-top: 2.5rem;">
           <div class="section-title">
             <span>✨</span> Recommended Destinations
           </div>
           <span style="font-size: 0.85rem; color: var(--text-subtle);">Handpicked by global travelers</span>
         </div>
 
-        <div class="destinations-grid">
+        <div class="destinations-grid scroll-reveal delay-3">
           ${CONFIG.DESTINATIONS.slice(0, 4).map(dest => `
-            <div class="glass-card destination-card glass-card-interactive" onclick="DashboardView.planTripToDestination('${dest.id}')">
+            <div class="glass-card destination-card glass-card-interactive tilt-card" onclick="DashboardView.planTripToDestination('${dest.id}')">
+              <div class="tilt-glare"></div>
               <img src="${dest.image}" alt="${dest.name}" class="destination-card-img" />
               <div class="destination-card-overlay">
                 <div class="flex items-center justify-between" style="margin-bottom: 0.25rem;">
@@ -211,7 +193,7 @@ const DashboardView = {
                 <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.75rem; line-height: 1.3;">${dest.description}</p>
                 <div class="flex items-center justify-between">
                   <span style="font-size: 0.8rem; color: var(--accent-emerald);">Avg ${Utils.formatCurrency(dest.avgDailyCost, 'USD')}/day</span>
-                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); DashboardView.planTripToDestination('${dest.id}')">
+                  <button class="btn btn-primary btn-sm ripple-effect" onclick="event.stopPropagation(); DashboardView.planTripToDestination('${dest.id}')">
                     Plan Trip &rarr;
                   </button>
                 </div>
@@ -224,18 +206,25 @@ const DashboardView = {
       contentHtml += `</div>`;
       container.innerHTML = contentHtml;
 
+      // Mount VisitTheUSA Cinematic Story Carousel & Observers
+      requestAnimationFrame(() => {
+        if (typeof MotionEngine !== 'undefined') {
+          MotionEngine.renderStoryHero('story-hero-container');
+          MotionEngine.initScrollReveal();
+        }
+      });
+
     } catch (err) {
-      // Error handling with friendly Retry button
       container.innerHTML = `
         <div class="empty-state" style="margin-top: 3rem;">
           <div class="empty-state-icon" style="color: var(--accent-rose);">⚠️</div>
           <h3 class="empty-state-title">Failed to load Dashboard data</h3>
-          <p class="empty-state-desc">${Utils.escapeHtml(err.message || 'A network error occurred while synchronizing your travel plans.')}</p>
+          <p class="empty-state-desc">${Utils.escapeHtml(err.message || 'An error occurred while loading dashboard.')}</p>
           <div class="flex items-center gap-3">
-            <button class="btn btn-primary" onclick="DashboardView.retryLoad()">
+            <button class="btn btn-primary ripple-effect" onclick="DashboardView.retryLoad()">
               <span>🔄</span> Retry Loading
             </button>
-            <button class="btn btn-secondary" onclick="AppStore.resetToDemo(); DashboardView.render();">
+            <button class="btn btn-secondary ripple-effect" onclick="AppStore.resetToDemo(); DashboardView.render();">
               <span>⚡</span> Reset to Demo Trips
             </button>
           </div>
@@ -246,7 +235,7 @@ const DashboardView = {
 
   renderSkeleton(container) {
     container.innerHTML = `
-      <div class="skeleton" style="height: 180px; border-radius: var(--radius-lg); margin-bottom: 2rem;"></div>
+      <div class="skeleton" style="height: 320px; border-radius: var(--radius-lg); margin-bottom: 2rem;"></div>
       <div class="stats-grid">
         <div class="skeleton" style="height: 90px; border-radius: var(--radius-md);"></div>
         <div class="skeleton" style="height: 90px; border-radius: var(--radius-md);"></div>

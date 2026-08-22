@@ -56,6 +56,7 @@ const AppRouter = {
     // Initial load
     this.updateUserNavbar(AppStore.user);
     this.updateNavCounts();
+    if (typeof MotionEngine !== 'undefined') MotionEngine.init();
     this.handleHashChange();
   },
 
