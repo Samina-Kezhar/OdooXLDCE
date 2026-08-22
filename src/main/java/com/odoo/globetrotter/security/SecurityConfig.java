@@ -27,6 +27,8 @@ public class SecurityConfig {
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable()) // Disabled for hackathon; re-enable for production
             .authorizeHttpRequests(auth -> auth
+                // Frontend static assets
+                .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**", "/error").permitAll()
                 // Auth endpoints — public
                 .requestMatchers("/api/auth/**").permitAll()
                 // Shared trip view — public (read-only)
@@ -35,8 +37,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
-            )
-            .httpBasic(withDefaults()); // Session-based via JSESSIONID cookie
+            ); // Removed .httpBasic() to prevent browser popup
 
         return http.build();
     }
