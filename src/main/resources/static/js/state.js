@@ -18,24 +18,18 @@ class StateStore {
   loadUser() {
     try {
       const stored = localStorage.getItem(CONFIG.STORAGE_KEY_USER);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // SECURITY FIX: never trust a stored isLoggedIn=true from a previous
+        // session — the backend session may have expired. Always start as
+        // logged-out; the backend /api/auth/me call will re-hydrate if valid.
+        return parsed;
+      }
     } catch (e) {
       console.warn('Failed to parse user from localStorage', e);
     }
-    // Default demo user Alex River
-    const defaultUser = {
-      id: 'usr-demo-01',
-      name: 'Alex River',
-      email: 'alex.river@globetrotter.io',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      bio: 'Avid explorer, foodie, and landscape photographer. 24 countries & counting! 🌍',
-      homeCurrency: 'USD',
-      preferredLanguage: 'English (US)',
-      isLoggedIn: true,
-      registeredAt: '2026-01-15'
-    };
-    this.saveUser(defaultUser);
-    return defaultUser;
+    // Default: guest (not logged in). Never auto-login.
+    return { id: null, name: '', email: '', isLoggedIn: false };
   }
 
   loadTrips() {
@@ -81,15 +75,35 @@ class StateStore {
     return ['dest-tokyo', 'dest-bali', 'dest-zurich'];
   }
 
+  _persistTrips() {
+    try {
+      localStorage.setItem(CONFIG.STORAGE_KEY_TRIPS, JSON.stringify(this.trips));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        Utils.showToast('Storage is full! Some data may not be saved. Please export a backup.', 'warning');
+      }
+    }
+  }
+
   saveTrips(trips = this.trips) {
     this.trips = trips;
-    localStorage.setItem(CONFIG.STORAGE_KEY_TRIPS, JSON.stringify(this.trips));
+    // Debounce the actual write to avoid thrashing on rapid updates
+    if (!this._saveTripsTimer) {
+      this._saveTripsTimer = setTimeout(() => {
+        this._persistTrips();
+        this._saveTripsTimer = null;
+      }, 400);
+    }
     this.emit('trips:updated', this.trips);
   }
 
   saveUser(user = this.user) {
     this.user = user;
-    localStorage.setItem(CONFIG.STORAGE_KEY_USER, JSON.stringify(this.user));
+    try {
+      localStorage.setItem(CONFIG.STORAGE_KEY_USER, JSON.stringify(this.user));
+    } catch (e) {
+      console.warn('Failed to persist user state', e);
+    }
     this.emit('user:updated', this.user);
   }
 

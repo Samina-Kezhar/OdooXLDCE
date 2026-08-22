@@ -143,8 +143,10 @@ const AuthView = {
 
   async handleLogin(event) {
     event.preventDefault();
+    if (AuthView._authInProgress) return; // ISSUE-09: prevent double-submit
+    AuthView._authInProgress = true;
     const btn = document.getElementById('btn-login-submit');
-    const email = document.getElementById('login-email').value.trim();
+    const email = document.getElementById('login-email').value.trim().toLowerCase(); // ISSUE-07: normalize
     const password = document.getElementById('login-password').value;
 
     // Validate email format
@@ -155,6 +157,7 @@ const AuthView = {
     }
 
     btn.classList.add('btn-loading');
+    btn.disabled = true;
     try {
       await MockApi.login(email, password);
       Utils.showToast(`Welcome back, ${AppStore.user.name}! 🚀`, 'success');
@@ -163,14 +166,18 @@ const AuthView = {
       Utils.showToast(err.message || 'Login failed. Please verify your credentials.', 'error');
     } finally {
       btn.classList.remove('btn-loading');
+      btn.disabled = false;
+      AuthView._authInProgress = false;
     }
   },
 
   async handleSignup(event) {
     event.preventDefault();
+    if (AuthView._authInProgress) return; // ISSUE-09: prevent double-submit
+    AuthView._authInProgress = true;
     const btn = document.getElementById('btn-signup-submit');
     const name = document.getElementById('signup-name').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
+    const email = document.getElementById('signup-email').value.trim().toLowerCase(); // ISSUE-07: normalize
     const password = document.getElementById('signup-password').value;
     const confirm = document.getElementById('signup-confirm').value;
 
@@ -192,6 +199,7 @@ const AuthView = {
     }
 
     btn.classList.add('btn-loading');
+    btn.disabled = true;
     try {
       await MockApi.signup(name, email, password);
       Utils.showToast('Account created successfully! Welcome to GlobeTrotter 🎉', 'success');
@@ -205,6 +213,8 @@ const AuthView = {
       }
     } finally {
       btn.classList.remove('btn-loading');
+      btn.disabled = false;
+      AuthView._authInProgress = false;
     }
   },
 

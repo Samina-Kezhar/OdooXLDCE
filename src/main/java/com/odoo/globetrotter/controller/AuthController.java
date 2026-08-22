@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -40,10 +42,15 @@ public class AuthController {
 
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
+    // ISSUE-19: Simple in-memory rate limiter — max 10 login attempts per IP
+    private final Map<String, AtomicInteger> loginAttempts = new ConcurrentHashMap<>();
+
     // ─── POST /signup ─────────────────────────────────────────────────────────────
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
+        // ISSUE-07: normalize email to lowercase
+        String email = signUpRequest.getEmail().trim().toLowerCase();
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Error: Email is already in use!");
             return ResponseEntity
@@ -52,8 +59,8 @@ public class AuthController {
         }
 
         User user = new User();
-        user.setName(signUpRequest.getName());
-        user.setEmail(signUpRequest.getEmail());
+        user.setName(signUpRequest.getName().trim());
+        user.setEmail(email); // already normalized
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
         userRepository.save(user);
@@ -65,19 +72,39 @@ public class AuthController {
 
     // ─── POST /login ──────────────────────────────────────────────────────────────
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest,
+                                              HttpServletRequest request, HttpServletResponse response) {
+        // ISSUE-19: rate limit by IP
+        String ip = request.getRemoteAddr();
+        AtomicInteger attempts = loginAttempts.computeIfAbsent(ip, k -> new AtomicInteger(0));
+        if (attempts.get() >= 10) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Too many login attempts. Please wait a moment before trying again.");
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(err);
+        }
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        // ISSUE-07: normalize email
+        String email = loginRequest.getEmail().trim().toLowerCase();
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, loginRequest.getPassword()));
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
-        securityContextRepository.saveContext(context, request, response);
+            // Successful login — reset attempt counter
+            loginAttempts.remove(ip);
 
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("message", "User logged in successfully!");
-        return ResponseEntity.ok(responseBody);
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(authentication);
+            SecurityContextHolder.setContext(context);
+            securityContextRepository.saveContext(context, request, response);
+
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("message", "User logged in successfully!");
+            return ResponseEntity.ok(responseBody);
+        } catch (Exception ex) {
+            // Increment failure counter
+            attempts.incrementAndGet();
+            throw ex; // re-throw so GlobalExceptionHandler returns 401
+        }
     }
 
     // ─── POST /logout ─────────────────────────────────────────────────────────────

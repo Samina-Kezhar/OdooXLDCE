@@ -2,6 +2,7 @@ package com.odoo.globetrotter.dto;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
@@ -16,6 +17,10 @@ public class TripRequest {
 
     private LocalDate startDate;
     private LocalDate endDate;
+
+    // ISSUE-02: Only allow http/https URLs for cover photos — prevents XSS/SSRF
+    @Size(max = 2048, message = "Cover photo URL must not exceed 2048 characters")
+    @Pattern(regexp = "^(https?://.+)?$", message = "Cover photo must be a valid http or https URL")
     private String coverPhoto;
 
     // Getters and Setters

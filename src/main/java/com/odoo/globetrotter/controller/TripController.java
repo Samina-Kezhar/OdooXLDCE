@@ -1,6 +1,7 @@
 package com.odoo.globetrotter.controller;
 
 import com.odoo.globetrotter.dto.TripRequest;
+
 import com.odoo.globetrotter.dto.TripResponse;
 import com.odoo.globetrotter.model.Stop;
 import com.odoo.globetrotter.model.Activity;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,10 +55,25 @@ public class TripController {
         return ResponseEntity.ok(response);
     }
 
-    // ─── POST create new trip ────────────────────────────────────────────────────
+    // ─── POST create new trip ────────────────────────────────────────
     @PostMapping
-    public ResponseEntity<TripResponse> createTrip(@Valid @RequestBody TripRequest request, Authentication authentication) {
+    @Transactional // ISSUE-15: atomic write
+    public ResponseEntity<?> createTrip(@Valid @RequestBody TripRequest request, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
+
+        // ISSUE-05: Validate date range
+        if (request.getStartDate() != null && request.getEndDate() != null
+                && request.getEndDate().isBefore(request.getStartDate())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "End date must be on or after start date."));
+        }
+
+        // ISSUE-17: Enforce per-user trip limit
+        long tripCount = tripRepository.countByUserId(user.getId());
+        if (tripCount >= 100) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("error", "Maximum trip limit (100) reached. Delete old trips to create new ones."));
+        }
 
         Trip trip = new Trip();
         trip.setName(request.getName());
@@ -85,12 +102,20 @@ public class TripController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ─── PUT update trip ─────────────────────────────────────────────────────────
+    // ─── PUT update trip ──────────────────────────────────────────────────────────────
     @PutMapping("/{id}")
+    @Transactional // ISSUE-15: atomic write
     public ResponseEntity<?> updateTrip(@PathVariable Long id,
                                         @Valid @RequestBody TripRequest request,
                                         Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
+
+        // ISSUE-05: Validate date range
+        if (request.getStartDate() != null && request.getEndDate() != null
+                && request.getEndDate().isBefore(request.getStartDate())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "End date must be on or after start date."));
+        }
 
         return tripRepository.findById(id)
                 .map(trip -> {
@@ -134,10 +159,9 @@ public class TripController {
                     if (!trip.getUser().getId().equals(user.getId())) {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                     }
-                    // Generate share token if not already shared
-                    if (trip.getShareToken() == null) {
-                        trip.setShareToken(UUID.randomUUID().toString());
-                    }
+                    // ISSUE-11: Always generate a NEW token on each share/reshare
+                    // so previously shared links are automatically invalidated.
+                    trip.setShareToken(UUID.randomUUID().toString());
                     trip.setPublic(true);
                     Trip savedTrip = tripRepository.save(trip);
 

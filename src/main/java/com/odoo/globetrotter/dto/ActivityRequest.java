@@ -1,6 +1,10 @@
 package com.odoo.globetrotter.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,9 +18,14 @@ public class ActivityRequest {
     @Size(max = 2000, message = "Description must not exceed 2000 characters")
     private String description;
 
-    /** E.g., Transport, Stay, Activities, Meals */
+    /** E.g., Transport, Stay, Activities, Meals, Other */
+    @Pattern(regexp = "^(Transport|Stay|Activities|Meals|Other)$",
+             message = "Type must be one of: Transport, Stay, Activities, Meals, Other")
     private String type;
 
+    @DecimalMin(value = "0.00", message = "Cost cannot be negative")
+    @DecimalMax(value = "9999999.99", message = "Cost exceeds the maximum allowed value")
+    @Digits(integer = 7, fraction = 2, message = "Invalid cost format: max 7 integer digits, 2 decimal places")
     private BigDecimal estimatedCost;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

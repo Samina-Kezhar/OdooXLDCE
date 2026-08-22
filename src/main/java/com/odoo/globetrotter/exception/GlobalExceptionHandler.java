@@ -1,5 +1,7 @@
 package com.odoo.globetrotter.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +20,8 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Handle @Valid / @Validated constraint violations.
@@ -67,13 +71,14 @@ public class GlobalExceptionHandler {
 
     /**
      * Catch-all for unexpected server errors.
-     * Returns JSON instead of an HTML error page.
+     * Logs full detail server-side; returns a safe generic message to the client.
+     * ISSUE-14: Never expose ex.getMessage() — it can leak table names, file paths, etc.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
         Map<String, String> response = new HashMap<>();
-        response.put("error", "An unexpected error occurred");
-        response.put("detail", ex.getMessage());
+        response.put("error", "An unexpected error occurred. Please try again later.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

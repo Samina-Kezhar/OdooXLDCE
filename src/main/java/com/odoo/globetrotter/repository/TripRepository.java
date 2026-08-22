@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface TripRepository extends JpaRepository<Trip, Long> {
     List<Trip> findByUserId(Long userId);
     Optional<Trip> findByShareToken(String shareToken);
+    long countByUserId(Long userId); // ISSUE-17: trip count limit enforcement
 }
+

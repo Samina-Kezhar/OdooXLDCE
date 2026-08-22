@@ -31,7 +31,7 @@ const Utils = {
     toast.innerHTML = `
       <div class="toast-icon">${icons[type] || 'ℹ'}</div>
       <div class="toast-content">
-        <div class="toast-title">${title || defaultTitles[type] || 'Notification'}</div>
+        <div class="toast-title">${Utils.escapeHtml(title || defaultTitles[type] || 'Notification')}</div>
         <div class="toast-message">${Utils.escapeHtml(message)}</div>
       </div>
       <button class="toast-close" aria-label="Close">&times;</button>
@@ -213,9 +213,10 @@ const Utils = {
 
   daysBetween(startStr, endStr) {
     if (!startStr || !endStr) return 1;
-    const start = new Date(startStr);
-    const end = new Date(endStr);
-    const diff = Math.max(0, end - start);
+    // Append T00:00:00 to force LOCAL timezone parsing (not UTC midnight)
+    const start = new Date(startStr + 'T00:00:00');
+    const end   = new Date(endStr   + 'T00:00:00');
+    const diff  = Math.max(0, end - start);
     return Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
   },
 
@@ -228,11 +229,15 @@ const Utils = {
   },
 
   getTripStatus(trip) {
-    const today = new Date().toISOString().split('T')[0];
-    if (trip.startDate > today) {
-      const daysLeft = Utils.daysBetween(today, trip.startDate) - 1;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
+    const start = new Date(trip.startDate + 'T00:00:00');
+    const end   = new Date(trip.endDate   + 'T00:00:00');
+    if (start > today) {
+      const daysLeft = Utils.daysBetween(todayStr, trip.startDate) - 1;
       return { label: `In ${daysLeft} days`, type: 'primary', raw: 'upcoming' };
-    } else if (trip.endDate < today) {
+    } else if (end < today) {
       return { label: 'Completed', type: 'gray', raw: 'past' };
     } else {
       return { label: 'Ongoing Now', type: 'emerald', raw: 'ongoing' };
