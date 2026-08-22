@@ -81,15 +81,18 @@ const ItineraryBuilderView = {
           <div class="itinerary-container">
             <!-- Left: Days & Activities List -->
             <div class="itinerary-days-list">
-              ${trip.days.map(day => {
+              ${trip.days.map((day, dayIndex) => {
                 const conflictData = Utils.detectActivityConflicts(day.activities);
                 const daySpent = day.activities.reduce((sum, a) => sum + (Number(a.cost) || 0), 0);
+                const dayColors = ['var(--primary-500)', 'var(--accent-cyan)', 'var(--accent-emerald)', 'var(--accent-amber)', 'var(--accent-rose)', '#a78bfa', '#34d399', '#f472b6'];
+                const borderColor = dayColors[dayIndex % dayColors.length];
 
                 return `
-                  <div class="day-card ${conflictData.hasConflict ? 'has-conflict' : ''}" id="day-card-${day.dayNumber}">
-                    <div class="day-card-header">
+                  <div class="day-card ${conflictData.hasConflict ? 'has-conflict' : ''}" id="day-card-${day.dayNumber}"
+                    style="border-left: 4px solid ${borderColor}; margin-bottom: 1.5rem; border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.18);">
+                    <div class="day-card-header" style="background: linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 100%); padding: 1rem 1.25rem;">
                       <div class="flex items-center gap-3">
-                        <div class="day-number-badge">Day ${day.dayNumber}</div>
+                        <div class="day-number-badge" style="background: ${borderColor}; color: #fff; min-width: 2.5rem; text-align: center;">Day ${day.dayNumber}</div>
                         <div>
                           <div class="font-bold" style="font-size: 0.95rem;">${Utils.formatDate(day.date)}</div>
                           <div style="font-size: 0.78rem; color: var(--accent-cyan);">📍 ${Utils.escapeHtml(day.city || trip.destination)}</div>
@@ -118,17 +121,18 @@ const ItineraryBuilderView = {
                     ` : ''}
 
                     <!-- Day Activities -->
-                    <div class="day-activities-list" id="day-act-list-${day.dayNumber}">
+                    <div class="day-activities-list" id="day-act-list-${day.dayNumber}" style="padding: 0.5rem 0;">
                       ${day.activities.length === 0 ? `
-                        <div style="text-align: center; padding: 1.5rem; color: var(--text-subtle); font-size: 0.875rem;">
-                          No activities scheduled for this day yet. Click <strong>"+ Add Activity"</strong> or search destinations.
+                        <div style="text-align: center; padding: 2rem 1.5rem; color: var(--text-subtle); font-size: 0.875rem;">
+                          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🗓️</div>
+                          No activities scheduled for Day ${day.dayNumber} yet.<br/>Click <strong>"+ Add Activity"</strong> to get started.
                         </div>
                       ` : day.activities.map((act, index) => {
                         const isConflicted = conflictData.conflictingIds.has(act.id);
                         const categoryMeta = CONFIG.CATEGORIES.find(c => c.id === act.category) || CONFIG.CATEGORIES[0];
 
                         return `
-                          <div class="activity-item ${isConflicted ? 'conflict-overlap' : ''}" id="act-item-${act.id}" data-act-id="${act.id}">
+                          <div class="activity-item ${isConflicted ? 'conflict-overlap' : ''}" id="act-item-${act.id}" data-act-id="${act.id}" style="margin: 0.5rem 0.75rem; border-radius: var(--radius-sm);">
                             <div class="activity-drag-handle" title="Reorder Activity">⋮⋮</div>
                             <div style="font-size: 1.35rem;" title="${categoryMeta.name}">${categoryMeta.icon}</div>
                             
@@ -147,7 +151,6 @@ const ItineraryBuilderView = {
                             <div class="activity-cost-tag">${Utils.formatCurrency(act.cost || 0, trip.currency)}</div>
 
                             <div class="flex items-center gap-1">
-                              <!-- Move Up/Down Controls -->
                               ${index > 0 ? `
                                 <button class="btn btn-ghost btn-sm" onclick="ItineraryBuilderView.moveActivity('${trip.id}', ${day.dayNumber}, ${index}, -1)" title="Move earlier">▲</button>
                               ` : ''}
@@ -164,6 +167,7 @@ const ItineraryBuilderView = {
                   </div>
                 `;
               }).join('')}
+
             </div>
 
             <!-- Right Sidebar: Trip Controls & Quick Add -->

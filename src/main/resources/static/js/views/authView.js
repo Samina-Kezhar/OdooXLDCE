@@ -27,7 +27,7 @@ const AuthView = {
           <form id="form-login" onsubmit="AuthView.handleLogin(event)">
             <div class="form-group">
               <label class="form-label" for="login-email">Email Address <span class="required">*</span></label>
-              <input type="email" id="login-email" class="form-control" placeholder="alex.river@globetrotter.io" required value="alex.river@globetrotter.io" />
+              <input type="email" id="login-email" class="form-control" placeholder="Enter your email address" required />
               <div class="form-error hidden" id="login-email-error"></div>
             </div>
 
@@ -36,7 +36,7 @@ const AuthView = {
                 <label class="form-label" for="login-password">Password <span class="required">*</span></label>
                 <a href="javascript:void(0)" onclick="AuthView.openForgotPasswordModal()" style="font-size: 0.8rem;">Forgot password?</a>
               </div>
-              <input type="password" id="login-password" class="form-control" placeholder="••••••••" required value="password123" />
+              <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required />
               <div class="form-error hidden" id="login-password-error"></div>
             </div>
 
@@ -56,7 +56,6 @@ const AuthView = {
             <div class="form-group">
               <label class="form-label" for="signup-email">Email Address <span class="required">*</span></label>
               <input type="email" id="signup-email" class="form-control" placeholder="name@example.com" required />
-              <div class="form-hint">Tip: Try 'taken@globetrotter.io' to test the 409 Conflict edge case.</div>
               <div class="form-error hidden" id="signup-email-error"></div>
             </div>
 
@@ -175,9 +174,10 @@ const AuthView = {
     const password = document.getElementById('signup-password').value;
     const confirm = document.getElementById('signup-confirm').value;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Strict real email validation: must have proper domain and TLD (e.g. name@domain.com)
+    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      Utils.showToast('Please provide a valid email address.', 'error');
+      Utils.showToast('Please enter a valid real email address (e.g. name@gmail.com).', 'error');
       return;
     }
 

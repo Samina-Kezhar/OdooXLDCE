@@ -107,17 +107,17 @@ const ProfileView = {
           ${wishlistDests.length === 0 ? `
             <p style="color: var(--text-subtle); font-style: italic;">No destinations bookmarked in your wishlist yet.</p>
           ` : `
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-3">
               ${wishlistDests.map(dest => `
-                <div class="glass-card-subtle flex items-center justify-between" style="padding: 0.75rem 1rem;">
-                  <div class="flex items-center gap-3">
-                    <img src="${dest.image}" style="width: 48px; height: 48px; border-radius: var(--radius-xs); object-fit: cover;" />
-                    <div>
-                      <div class="font-bold" style="font-size: 0.95rem;">${dest.name}, ${dest.country}</div>
+                <div class="glass-card-subtle" style="padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                  <div style="display: flex; align-items: center; gap: 0.85rem; min-width: 0; flex: 1;">
+                    <img src="${dest.image}" style="width: 56px; height: 56px; min-width: 56px; border-radius: var(--radius-xs); object-fit: cover;" />
+                    <div style="min-width: 0;">
+                      <div class="font-bold" style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${dest.name}, ${dest.country}</div>
                       <div style="font-size: 0.78rem; color: var(--accent-cyan);">${dest.region} &bull; ★ ${dest.rating}</div>
                     </div>
                   </div>
-                  <div class="flex items-center gap-2">
+                  <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
                     <button class="btn btn-primary btn-sm" onclick="DashboardView.planTripToDestination('${dest.id}')">
                       Plan Trip &rarr;
                     </button>
@@ -129,6 +129,7 @@ const ProfileView = {
               `).join('')}
             </div>
           `}
+
         </div>
 
         <!-- Data Management & Danger Zone -->
