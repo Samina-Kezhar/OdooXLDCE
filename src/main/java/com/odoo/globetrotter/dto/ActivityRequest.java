@@ -1,12 +1,22 @@
 package com.odoo.globetrotter.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class ActivityRequest {
+
+    @NotBlank(message = "Activity name is required")
+    @Size(max = 255, message = "Activity name must not exceed 255 characters")
     private String name;
+
+    @Size(max = 2000, message = "Description must not exceed 2000 characters")
     private String description;
+
+    /** E.g., Transport, Stay, Activities, Meals */
     private String type;
+
     private BigDecimal estimatedCost;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

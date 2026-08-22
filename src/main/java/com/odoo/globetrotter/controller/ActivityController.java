@@ -8,6 +8,7 @@ import com.odoo.globetrotter.model.User;
 import com.odoo.globetrotter.repository.ActivityRepository;
 import com.odoo.globetrotter.repository.StopRepository;
 import com.odoo.globetrotter.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,27 +43,37 @@ public class ActivityController {
         return stop.getTrip().getUser().getId().equals(user.getId());
     }
 
+    // ─── GET all activities for a stop ────────────────────────────────────────────
     @GetMapping
-    public ResponseEntity<List<ActivityResponse>> getActivities(@PathVariable Long stopId, Authentication authentication) {
+    public ResponseEntity<?> getActivities(@PathVariable Long stopId, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
         Optional<Stop> stopOpt = stopRepository.findById(stopId);
 
-        if (stopOpt.isEmpty() || !isStopOwner(stopOpt.get(), user)) {
+        if (stopOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // Fix: 404, not 403
+        }
+        if (!isStopOwner(stopOpt.get(), user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         List<Activity> activities = activityRepository.findByStopIdOrderByStartTimeAsc(stopId);
         List<ActivityResponse> response = activities.stream().map(ActivityResponse::new).collect(Collectors.toList());
-        
+
         return ResponseEntity.ok(response);
     }
 
+    // ─── POST add an activity to a stop ──────────────────────────────────────────
     @PostMapping
-    public ResponseEntity<ActivityResponse> addActivity(@PathVariable Long stopId, @RequestBody ActivityRequest request, Authentication authentication) {
+    public ResponseEntity<?> addActivity(@PathVariable Long stopId,
+                                         @Valid @RequestBody ActivityRequest request,
+                                         Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
         Optional<Stop> stopOpt = stopRepository.findById(stopId);
 
-        if (stopOpt.isEmpty() || !isStopOwner(stopOpt.get(), user)) {
+        if (stopOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // Fix: 404, not 403
+        }
+        if (!isStopOwner(stopOpt.get(), user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -79,12 +90,51 @@ public class ActivityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ActivityResponse(savedActivity));
     }
 
-    @DeleteMapping("/{activityId}")
-    public ResponseEntity<?> deleteActivity(@PathVariable Long stopId, @PathVariable Long activityId, Authentication authentication) {
+    // ─── PUT update an activity ───────────────────────────────────────────────────
+    @PutMapping("/{activityId}")
+    public ResponseEntity<?> updateActivity(@PathVariable Long stopId,
+                                            @PathVariable Long activityId,
+                                            @Valid @RequestBody ActivityRequest request,
+                                            Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
         Optional<Stop> stopOpt = stopRepository.findById(stopId);
 
-        if (stopOpt.isEmpty() || !isStopOwner(stopOpt.get(), user)) {
+        if (stopOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!isStopOwner(stopOpt.get(), user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return activityRepository.findById(activityId)
+                .map(activity -> {
+                    if (!activity.getStop().getId().equals(stopId)) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                    }
+                    activity.setName(request.getName());
+                    activity.setDescription(request.getDescription());
+                    activity.setType(request.getType());
+                    activity.setEstimatedCost(request.getEstimatedCost());
+                    activity.setStartTime(request.getStartTime());
+                    activity.setEndTime(request.getEndTime());
+                    Activity updatedActivity = activityRepository.save(activity);
+                    return ResponseEntity.ok(new ActivityResponse(updatedActivity));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ─── DELETE an activity ───────────────────────────────────────────────────────
+    @DeleteMapping("/{activityId}")
+    public ResponseEntity<?> deleteActivity(@PathVariable Long stopId,
+                                            @PathVariable Long activityId,
+                                            Authentication authentication) {
+        User user = getAuthenticatedUser(authentication);
+        Optional<Stop> stopOpt = stopRepository.findById(stopId);
+
+        if (stopOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // Fix: 404, not 403
+        }
+        if (!isStopOwner(stopOpt.get(), user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

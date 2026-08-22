@@ -23,6 +23,13 @@ public class Trip {
     private LocalDate endDate;
     private String coverPhoto; // URL or path
 
+    // Trip sharing fields
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean isPublic = false;
+
+    @Column(unique = true)
+    private String shareToken; // UUID generated on share request
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -51,6 +58,12 @@ public class Trip {
 
     public String getCoverPhoto() { return coverPhoto; }
     public void setCoverPhoto(String coverPhoto) { this.coverPhoto = coverPhoto; }
+
+    public boolean isPublic() { return isPublic; }
+    public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
+
+    public String getShareToken() { return shareToken; }
+    public void setShareToken(String shareToken) { this.shareToken = shareToken; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
