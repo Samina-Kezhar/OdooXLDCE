@@ -42,7 +42,7 @@ public class AuthController {
 
     // ─── POST /signup ─────────────────────────────────────────────────────────────
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest, HttpServletRequest request, HttpServletResponse responseHttp) {
         if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Error: Email is already in use!");
@@ -58,8 +58,16 @@ public class AuthController {
 
         userRepository.save(user);
 
+        // Auto-login the user after successful registration
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(signUpRequest.getEmail(), signUpRequest.getPassword()));
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        securityContextRepository.saveContext(context, request, responseHttp);
+
         Map<String, String> response = new HashMap<>();
-        response.put("message", "User registered successfully!");
+        response.put("message", "User registered and logged in successfully!");
         return ResponseEntity.ok(response);
     }
 
