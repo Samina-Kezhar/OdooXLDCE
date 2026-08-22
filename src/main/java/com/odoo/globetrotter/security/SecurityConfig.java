@@ -26,9 +26,10 @@ public class SecurityConfig {
         http
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable()) // Disabled for hackathon; re-enable for production
+            .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Needed for H2 console
             .authorizeHttpRequests(auth -> auth
-                // Frontend static assets
-                .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**", "/error").permitAll()
+                // Frontend static assets and H2 console
+                .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico", "/h2-console/**").permitAll()
                 // Auth endpoints — public
                 .requestMatchers("/api/auth/**").permitAll()
                 // Shared trip view — public (read-only)
