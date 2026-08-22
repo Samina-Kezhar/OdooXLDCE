@@ -133,13 +133,32 @@ const AppRouter = {
   },
 
   updateUserNavbar(user) {
+    const isLoggedIn = !!user?.isLoggedIn;
+    
+    // Toggle visibility of authenticated-only UI elements
+    const authElements = [
+      '.sidebar-nav',
+      '.sidebar-footer',
+      '#mobile-nav',
+      '#btn-topbar-plan-trip',
+      '.search-quick-bar',
+      '.sidebar-toggle-btn'
+    ];
+    
+    authElements.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        el.style.display = isLoggedIn ? '' : 'none';
+      });
+    });
+
+    // Update user profile info in sidebar
     const nameEl = document.getElementById('user-sidebar-name');
     const emailEl = document.getElementById('user-sidebar-email');
     const avatarEl = document.getElementById('user-sidebar-avatar');
 
-    if (nameEl) nameEl.innerText = user.name;
-    if (emailEl) emailEl.innerText = user.email;
-    if (avatarEl && user.avatar) avatarEl.src = user.avatar;
+    if (nameEl) nameEl.innerText = user?.name || '';
+    if (emailEl) emailEl.innerText = user?.email || '';
+    if (avatarEl && user?.avatar) avatarEl.src = user.avatar;
   },
 
   updateNavCounts() {
